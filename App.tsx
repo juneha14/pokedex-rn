@@ -1,15 +1,50 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  gql,
+} from "@apollo/client";
+
+const client = new ApolloClient({
+  uri: "https://graphql-pokeapi.vercel.app/api/graphql",
+  cache: new InMemoryCache(),
+});
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ApolloProvider client={client}>
+      <Content />
+    </ApolloProvider>
   );
 }
+
+const POKEMON_LIST = gql`
+  query PokemonList {
+    pokemons {
+      status
+      message
+      results {
+        id
+        name
+        artwork
+      }
+    }
+  }
+`;
+
+const Content = () => {
+  const { loading, error, data } = useQuery(POKEMON_LIST);
+  console.log("==== Value of data:", data);
+
+  return (
+    <View style={styles.container}>
+      {loading ? <Text>Loading...</Text> : <Text>{JSON.stringify(data)}</Text>}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
