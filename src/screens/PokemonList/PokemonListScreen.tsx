@@ -1,14 +1,11 @@
 import React, { useCallback } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pokemon } from "../../models/local";
+import { LoadingIndicator } from "../../components/LoadingIndicator";
 import { PokemonListItem } from "./PokemonListItem";
 import { usePokemonList } from "./usePokemonList";
-
-// theme.ts file
-// finalize UX
-// id number formatted
-// different colors for the attributes tag
+import { Pokemon } from "../../models/local";
+import { Colors, Spacing } from "../../utils/theme";
 
 export const PokemonListScreen = () => {
   const { loading, data } = usePokemonList();
@@ -29,13 +26,15 @@ export const PokemonListScreen = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 5 }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingHorizontal: Spacing.s,
+        backgroundColor: Colors.SurfaceBackground,
+      }}
+    >
       {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator color="#0000ff" />
-        </View>
+        <LoadingIndicator />
       ) : (
         <FlatList
           keyExtractor={(item) => item.id.toString()}
