@@ -1,12 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-} from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import PokemonListScreen from "./src/screens/PokemonList";
 
 const client = new ApolloClient({
   uri: "https://graphql-pokeapi.vercel.app/api/graphql",
@@ -16,41 +10,7 @@ const client = new ApolloClient({
 export default function App() {
   return (
     <ApolloProvider client={client}>
-      <Content />
+      <PokemonListScreen />
     </ApolloProvider>
   );
 }
-
-const POKEMON_LIST = gql`
-  query PokemonList {
-    pokemons {
-      status
-      message
-      results {
-        id
-        name
-        artwork
-      }
-    }
-  }
-`;
-
-const Content = () => {
-  const { loading, error, data } = useQuery(POKEMON_LIST);
-  console.log("==== Value of data:", data);
-
-  return (
-    <View style={styles.container}>
-      {loading ? <Text>Loading...</Text> : <Text>{JSON.stringify(data)}</Text>}
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
