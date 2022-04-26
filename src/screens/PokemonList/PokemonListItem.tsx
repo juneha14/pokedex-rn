@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Image, Text, Dimensions } from "react-native";
-import { Type } from "../models/server";
+import { Type } from "../../models/server";
 
 const WIDTH = (Dimensions.get("window").width - 2 * 5) / 2 - 2;
 const IMG_SIZE = WIDTH * 0.7;

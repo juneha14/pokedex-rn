@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pokemon } from "../models/local";
+import { Pokemon } from "../../models/local";
 import { PokemonListItem } from "./PokemonListItem";
 import { usePokemonList } from "./usePokemonList";
 

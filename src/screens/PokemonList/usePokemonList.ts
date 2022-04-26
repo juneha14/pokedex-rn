@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useApolloClient, useQuery } from "@apollo/client";
-import { Pokemon } from "../models/local";
+import { Pokemon } from "../../models/local";
 import {
   PokemonListResponse,
   PokemonItem,
   PokemonAttributeResponse,
-} from "../models/server";
+} from "../../models/server";
 import {
   POKEMON_LIST,
   POKEMON_ATTRIBUTE,
