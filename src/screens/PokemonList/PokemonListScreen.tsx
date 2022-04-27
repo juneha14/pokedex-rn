@@ -6,9 +6,21 @@ import { PokemonListItem } from "./PokemonListItem";
 import { usePokemonList } from "./usePokemonList";
 import { Pokemon } from "../../models/local";
 import { Colors, Spacing } from "../../utils/theme";
+import { useRouteNavigation } from "../../navigation/useRoutes";
 
 export const PokemonListScreen = () => {
   const { loading, data } = usePokemonList();
+  const { navigate } = useRouteNavigation();
+
+  const onSelectPokemon = useCallback(
+    (pokemon: Pokemon) => () => {
+      navigate("PokemonDetails", {
+        imgUri: pokemon.artwork,
+        name: pokemon.name,
+      });
+    },
+    [navigate]
+  );
 
   const renderItem = useCallback(
     ({ item, index }: { item: Pokemon; index: number }) => {
@@ -19,10 +31,11 @@ export const PokemonListScreen = () => {
           imageUri={item.artwork}
           attributes={item.attributes}
           index={index}
+          onPress={onSelectPokemon(item)}
         />
       );
     },
-    []
+    [onSelectPokemon]
   );
 
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, Text, Dimensions } from "react-native";
+import { View, Image, Text, Dimensions, Pressable } from "react-native";
 import { TagList } from "../../components/TagList";
 import { Type } from "../../models/server";
 import { getColorForAttribute } from "../../utils/getColorForAttribute";
@@ -14,15 +14,17 @@ export const PokemonListItem = ({
   id,
   attributes,
   index,
+  onPress,
 }: {
   imageUri: string;
   name: string;
   id: number;
   attributes: Type[];
   index: number;
+  onPress: () => void;
 }) => {
   return (
-    <View
+    <Pressable
       style={{
         width: WIDTH,
         marginRight: index % 2 === 0 ? Spacing.s : 0,
@@ -33,6 +35,7 @@ export const PokemonListItem = ({
         overflow: "hidden",
         backgroundColor: Colors.SurfaceForeground,
       }}
+      onPress={onPress}
     >
       <View
         style={{
@@ -85,6 +88,6 @@ export const PokemonListItem = ({
           })}
         />
       </View>
-    </View>
+    </Pressable>
   );
 };
