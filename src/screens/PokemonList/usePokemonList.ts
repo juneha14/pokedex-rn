@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { useApolloClient, useQuery } from "@apollo/client";
 import { Pokemon } from "../../models/local";
-import {
-  PokemonListResponse,
-  PokemonItem,
-  PokemonAttributeResponse,
-} from "../../models/server";
+import { PokemonItem } from "../../models/server";
 import {
   POKEMON_LIST,
   POKEMON_ATTRIBUTE,
   PokemonAttributeQueryVariables,
+  PokemonListResponse,
+  PokemonAttributeResponse,
 } from "./graphql";
 
 export const usePokemonList = () => {
@@ -38,7 +36,7 @@ export const usePokemonList = () => {
         if (!attribute.loading && attribute.data) {
           attributedPokemons.push({
             ...pokemon,
-            attributes: attribute.data.pokemon.types,
+            attributes: attribute.data.attributes.types,
           });
         }
       }

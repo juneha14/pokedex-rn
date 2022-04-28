@@ -3,12 +3,15 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import PokemonListScreen from "../screens/PokemonList";
 import PokemonDetailsScreen from "../screens/PokemonDetails";
+import { Type } from "../models/server";
 
 export type StackRouteParamList = {
   PokemonList: undefined;
   PokemonDetails: {
     imgUri: string;
     name: string;
+    id: number;
+    attributes: Type[];
   };
 };
 

@@ -14,10 +14,7 @@ export const PokemonListScreen = () => {
 
   const onSelectPokemon = useCallback(
     (pokemon: Pokemon) => () => {
-      navigate("PokemonDetails", {
-        imgUri: pokemon.artwork,
-        name: pokemon.name,
-      });
+      navigate("PokemonDetails", { ...pokemon, imgUri: pokemon.artwork });
     },
     [navigate]
   );

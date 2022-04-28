@@ -1,30 +1,95 @@
 import React from "react";
 import {
-  Pressable,
   Dimensions,
   Image,
   ScrollView,
   View,
   Text,
+  StyleSheet,
 } from "react-native";
-import { useRouteNavigation, useRouteParams } from "../../navigation/useRoutes";
-import { Ionicons } from "@expo/vector-icons";
+import { gql, useQuery } from "@apollo/client";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors, Spacing } from "../../utils/theme";
+import { useRouteParams } from "../../navigation/useRoutes";
+import { BaseName, Type } from "../../models/server";
 import { TagList } from "../../components/TagList";
+import { NavBackButton } from "../../components/NavBackButton";
+import { Section } from "../../components/Section";
 import { getColorForAttribute } from "../../utils/getColorForAttribute";
+import { Colors, Spacing } from "../../utils/theme";
+import { LoadingIndicator } from "../../components/LoadingIndicator";
+
+const POKEMON_DETAILS = gql`
+  query Pokemon($name: String!) {
+    pokemon(name: $name) {
+      id
+      height
+      weight
+      abilities {
+        ability {
+          name
+        }
+      }
+      stats {
+        base_stat
+        stat {
+          name
+        }
+      }
+      moves {
+        move {
+          name
+        }
+      }
+    }
+  }
+`;
+
+type PokemonDetailQueryVariables = {
+  name: string;
+};
+
+type PokemonDetailResponse = {
+  pokemon: {
+    id: number;
+    height: number;
+    weight: number;
+    abilities: Ability[];
+    stats: Stat[];
+    moves: Move[];
+  };
+};
+
+type Ability = {
+  ability: BaseName;
+};
+
+type Stat = {
+  base_stat: number;
+  stat: BaseName;
+};
+
+type Move = {
+  move: BaseName;
+};
 
 export const PokemonDetailsScreen = () => {
   const {
-    params: { imgUri, name },
+    params: { imgUri, name, id, attributes },
   } = useRouteParams("PokemonDetails");
+
+  const { loading, data } = useQuery<
+    PokemonDetailResponse,
+    PokemonDetailQueryVariables
+  >(POKEMON_DETAILS, { variables: { name } });
 
   return (
     <>
-      <NavigationBackButton />
-
-      <ScrollView>
-        <Header imgUri={imgUri} name={name} id="1" />
+      <NavBackButton />
+      <ScrollView
+        style={{ backgroundColor: Colors.SurfaceBackground }}
+        contentContainerStyle={{ backgroundColor: Colors.SurfaceBackground }}
+      >
+        <Header imgUri={imgUri} name={name} id={id} attributes={attributes} />
         <View
           style={{
             borderTopLeftRadius: 30,
@@ -35,40 +100,62 @@ export const PokemonDetailsScreen = () => {
             backgroundColor: Colors.SurfaceBackground,
           }}
         >
-          <View>
-            <Text>About</Text>
-          </View>
-          <View style={{ height: 100 }} />
+          {loading ? (
+            <LoadingIndicator />
+          ) : data ? (
+            <View>
+              <About
+                height={data.pokemon.height}
+                weight={data.pokemon.weight}
+                abilities={data.pokemon.abilities}
+              />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </>
   );
 };
 
-const Section = () => {
+const About = ({
+  height,
+  weight,
+  abilities,
+}: {
+  height: number;
+  weight: number;
+  abilities: Ability[];
+}) => {
   return (
-    <View>
-      <View />
-    </View>
+    <Section title="About">
+      {/* TODO: figure out unit conversion */}
+      <AboutRow title="Height" value={String(height)} />
+      <AboutRow title="Weight" value={String(weight)} />
+      <AboutRow
+        title="Abilities"
+        value={abilities.map((a) => a.ability.name).join(", ")}
+      />
+    </Section>
   );
 };
 
-const NavigationBackButton = () => {
-  const { pop } = useRouteNavigation();
-  const { top, left } = useSafeAreaInsets();
-
+const AboutRow = ({ title, value }: { title: string; value: string }) => {
   return (
-    <Pressable
+    <View
       style={{
-        position: "absolute",
-        top,
-        left: left + 10,
-        zIndex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        marginLeft: Spacing.s,
+        paddingVertical: Spacing.m,
       }}
-      onPress={() => pop()}
     >
-      <Ionicons name="ios-arrow-back" size={26} color={Colors.IconNeutral} />
-    </Pressable>
+      <Text style={{ flex: 1, color: Colors.TextSubdued, fontSize: 16 }}>
+        {title}
+      </Text>
+      <Text style={{ flex: 3, fontSize: 16, textTransform: "capitalize" }}>
+        {value}
+      </Text>
+    </View>
   );
 };
 
@@ -76,10 +163,12 @@ const Header = ({
   imgUri,
   name,
   id,
+  attributes,
 }: {
   imgUri: string;
-  id: string;
+  id: number;
   name: string;
+  attributes: Type[];
 }) => {
   const { top } = useSafeAreaInsets();
 
@@ -89,9 +178,15 @@ const Header = ({
         paddingTop: top + 50,
         paddingBottom: 30,
         paddingHorizontal: Spacing.defaultMargin,
-        backgroundColor: "pink",
       }}
     >
+      <View
+        style={{
+          ...StyleSheet.absoluteFillObject,
+          opacity: 0.5,
+          backgroundColor: getColorForAttribute(attributes[0].type.name),
+        }}
+      />
       <View
         style={{
           flexDirection: "row",
@@ -112,13 +207,10 @@ const Header = ({
           </Text>
           <TagList
             style={{ marginTop: Spacing.m }}
-            tags={[
-              { title: "Grass", color: getColorForAttribute("grass") },
-              {
-                title: "Poison",
-                color: getColorForAttribute("poison"),
-              },
-            ]}
+            tags={attributes.map((a) => ({
+              title: a.type.name,
+              color: getColorForAttribute(a.type.name),
+            }))}
           />
         </View>
         <Text
