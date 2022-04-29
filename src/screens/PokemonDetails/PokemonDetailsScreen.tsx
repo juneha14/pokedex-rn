@@ -8,16 +8,6 @@ import {
   StyleSheet,
   FlatList,
 } from "react-native";
-import { gql, useQuery } from "@apollo/client";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouteParams } from "../../navigation/useRoutes";
-import { BaseName, Type } from "../../models/server";
-import { TagList } from "../../components/TagList";
-import { NavBackButton } from "../../components/NavBackButton";
-import { Section } from "../../components/Section";
-import { getColorForAttribute } from "../../utils/getColorForAttribute";
-import { Colors, Spacing } from "../../utils/theme";
-import { LoadingIndicator } from "../../components/LoadingIndicator";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,6 +15,17 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { gql, useQuery } from "@apollo/client";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouteParams } from "../../navigation/useRoutes";
+import { BaseName, Type } from "../../models/server";
+import { TagList } from "../../components/TagList";
+import { NavBackButton } from "../../components/NavBackButton";
+import { Section } from "../../components/Section";
+import { LoadingIndicator } from "../../components/LoadingIndicator";
+import { getColorForAttribute } from "../../utils/getColorForAttribute";
+import { Colors, Spacing } from "../../utils/theme";
 import { clamp } from "../../utils/redash";
 
 const POKEMON_DETAILS = gql`
@@ -81,6 +82,30 @@ type Move = {
   move: BaseName;
 };
 
+const EVOLUTION_CHAIN = gql`
+  query Evolution($id: String!) {
+    evolutionChain(id: $id) {
+      response
+    }
+  }
+`;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JSON = Record<string, any>;
+
+type BaseResponse = {
+  status: boolean;
+  response: JSON;
+};
+
+type EvolutionChainQueryVariables = {
+  id: string;
+};
+
+type EvolutionChainResponse = {
+  evolutionChain: BaseResponse;
+};
+
 export const PokemonDetailsScreen = () => {
   const {
     params: { imgUri, name, id, attributes },
@@ -119,6 +144,7 @@ export const PokemonDetailsScreen = () => {
                 weight={data.pokemon.weight}
                 abilities={data.pokemon.abilities}
               />
+              <EvolutionChain id={id} />
               <Moves moves={data.pokemon.moves} />
               <Stats stats={data.pokemon.stats} />
             </View>
@@ -126,6 +152,123 @@ export const PokemonDetailsScreen = () => {
         </View>
       </ScrollView>
     </>
+  );
+};
+
+type Species = {
+  name: string;
+  url: string;
+};
+
+type EvolvesTo = {
+  species: Species;
+  evolves_to: EvolvesTo[];
+};
+
+type Chain = {
+  species: Species;
+  evolves_to: EvolvesTo[];
+};
+
+type EvolvePokemon = {
+  name: string;
+  imgUri: string;
+};
+
+const EvolutionChain = ({ id }: { id: number }) => {
+  const { loading, data } = useQuery<
+    EvolutionChainResponse,
+    EvolutionChainQueryVariables
+  >(EVOLUTION_CHAIN, {
+    variables: { id: `${Math.round((id + (id % 3)) / 3)}` },
+  });
+
+  const [chain, setChain] = useState<EvolvePokemon[]>();
+
+  useEffect(() => {
+    const chainForSpecies = (species: Species): EvolvePokemon => {
+      const id = species.url.charAt(species.url.length - 2);
+      return {
+        name: species.name,
+        imgUri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      };
+    };
+
+    if (!loading && data) {
+      const chain = data.evolutionChain.response["chain"] as Chain;
+      setChain([
+        chainForSpecies(chain.species),
+        chainForSpecies(chain.evolves_to[0].species),
+        chainForSpecies(chain.evolves_to[0].evolves_to[0].species),
+      ]);
+    }
+  }, [loading, data]);
+
+  return (
+    <Section title="Evolution" style={{ marginTop: Spacing.xl }}>
+      {chain ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: Spacing.m,
+          }}
+        >
+          {chain.map(({ name, imgUri }, index) => {
+            return (
+              <View
+                key={name}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: 100,
+                      height: 100,
+                      borderRadius: 50,
+                      borderWidth: 1,
+                      borderColor: Colors.BorderSubdued,
+                      backgroundColor: Colors.SurfaceBackgroundPressed,
+                    }}
+                  >
+                    <Image
+                      source={{ uri: imgUri }}
+                      style={{ width: 80, height: 80 }}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      textTransform: "capitalize",
+                      marginTop: Spacing.m,
+                      color: Colors.TextOnSurfaceNeutral,
+                    }}
+                  >
+                    {name}
+                  </Text>
+                </View>
+
+                {index < chain.length - 1 ? (
+                  <Ionicons
+                    name="ios-arrow-forward"
+                    size={26}
+                    color={Colors.IconNeutral}
+                  />
+                ) : null}
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+    </Section>
   );
 };
 
