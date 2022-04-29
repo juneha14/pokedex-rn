@@ -145,8 +145,8 @@ export const PokemonDetailsScreen = () => {
                 abilities={data.pokemon.abilities}
               />
               <EvolutionChain id={id} />
-              <Moves moves={data.pokemon.moves} />
               <Stats stats={data.pokemon.stats} />
+              <Moves moves={data.pokemon.moves} />
             </View>
           ) : null}
         </View>
@@ -160,19 +160,20 @@ type Species = {
   url: string;
 };
 
-type EvolvesTo = {
-  species: Species;
-  evolves_to: EvolvesTo[];
+type EvolutionDetails = {
+  min_level: number;
 };
 
 type Chain = {
   species: Species;
-  evolves_to: EvolvesTo[];
+  evolves_to: Chain[];
+  evolution_details: EvolutionDetails[];
 };
 
 type EvolvePokemon = {
   name: string;
   imgUri: string;
+  minimumLevel?: number;
 };
 
 const EvolutionChain = ({ id }: { id: number }) => {
@@ -186,20 +187,42 @@ const EvolutionChain = ({ id }: { id: number }) => {
   const [chain, setChain] = useState<EvolvePokemon[]>();
 
   useEffect(() => {
-    const chainForSpecies = (species: Species): EvolvePokemon => {
-      const id = species.url.charAt(species.url.length - 2);
+    const extractIdFromUrl = (url: string) => {
+      const id: string[] = [];
+      for (let i = url.length - 1; i >= 0; i--) {
+        const char = url.charAt(i);
+        const num = Number(char);
+        if (num || num === 0) {
+          id.push(char);
+        } else if (char === "/" && id.length > 0) {
+          break;
+        }
+      }
+
+      const res = id.reverse().reduce((prev, curr) => prev + curr, "");
+      return res;
+    };
+
+    const getPokemonForChain = (chain: Chain): EvolvePokemon => {
+      const id = extractIdFromUrl(chain.species.url);
+      const minLevel =
+        chain.evolution_details.length > 0
+          ? chain.evolution_details[0].min_level
+          : undefined;
+
       return {
-        name: species.name,
+        name: chain.species.name,
         imgUri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+        minimumLevel: minLevel,
       };
     };
 
     if (!loading && data) {
       const chain = data.evolutionChain.response["chain"] as Chain;
       setChain([
-        chainForSpecies(chain.species),
-        chainForSpecies(chain.evolves_to[0].species),
-        chainForSpecies(chain.evolves_to[0].evolves_to[0].species),
+        getPokemonForChain(chain),
+        getPokemonForChain(chain.evolves_to[0]),
+        getPokemonForChain(chain.evolves_to[0].evolves_to[0]),
       ]);
     }
   }, [loading, data]);
@@ -215,15 +238,39 @@ const EvolutionChain = ({ id }: { id: number }) => {
             marginTop: Spacing.m,
           }}
         >
-          {chain.map(({ name, imgUri }, index) => {
+          {chain.map(({ name, imgUri, minimumLevel }) => {
             return (
               <View
                 key={name}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
+                style={{ justifyContent: "center", alignItems: "center" }}
               >
+                {/* Evolution arrow */}
+                {minimumLevel ? (
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: 90,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width:
+                        (Dimensions.get("window").width -
+                          2 * Spacing.defaultMargin -
+                          3 * 90) /
+                        2,
+                    }}
+                  >
+                    <Ionicons
+                      name="ios-arrow-forward-outline"
+                      size={26}
+                      color={Colors.IconNeutral}
+                    />
+                    <Text style={{ color: Colors.TextSubdued, fontSize: 11 }}>
+                      {`Lvl ${minimumLevel}`}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {/* Pokemon image and name */}
                 <View
                   style={{ justifyContent: "center", alignItems: "center" }}
                 >
@@ -231,9 +278,9 @@ const EvolutionChain = ({ id }: { id: number }) => {
                     style={{
                       justifyContent: "center",
                       alignItems: "center",
-                      width: 100,
-                      height: 100,
-                      borderRadius: 50,
+                      width: 90,
+                      height: 90,
+                      borderRadius: 90 / 2,
                       borderWidth: 1,
                       borderColor: Colors.BorderSubdued,
                       backgroundColor: Colors.SurfaceBackgroundPressed,
@@ -241,7 +288,7 @@ const EvolutionChain = ({ id }: { id: number }) => {
                   >
                     <Image
                       source={{ uri: imgUri }}
-                      style={{ width: 80, height: 80 }}
+                      style={{ width: 70, height: 70 }}
                       resizeMode="contain"
                     />
                   </View>
@@ -255,14 +302,6 @@ const EvolutionChain = ({ id }: { id: number }) => {
                     {name}
                   </Text>
                 </View>
-
-                {index < chain.length - 1 ? (
-                  <Ionicons
-                    name="ios-arrow-forward"
-                    size={26}
-                    color={Colors.IconNeutral}
-                  />
-                ) : null}
               </View>
             );
           })}
