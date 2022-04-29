@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -6,6 +6,7 @@ import {
   View,
   Text,
   StyleSheet,
+  FlatList,
 } from "react-native";
 import { gql, useQuery } from "@apollo/client";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -104,6 +105,7 @@ export const PokemonDetailsScreen = () => {
             borderTopRightRadius: 30,
             marginTop: -30,
             paddingTop: 30,
+            paddingBottom: 30,
             paddingHorizontal: Spacing.defaultMargin,
             backgroundColor: Colors.SurfaceBackground,
           }}
@@ -117,6 +119,7 @@ export const PokemonDetailsScreen = () => {
                 weight={data.pokemon.weight}
                 abilities={data.pokemon.abilities}
               />
+              <Moves moves={data.pokemon.moves} />
               <Stats stats={data.pokemon.stats} />
             </View>
           ) : null}
@@ -126,9 +129,61 @@ export const PokemonDetailsScreen = () => {
   );
 };
 
+const Moves = ({ moves }: { moves: Move[] }) => {
+  const data = useMemo(() => {
+    const names = moves.map((move) => move.move.name);
+    const data: string[][] = [];
+
+    while (names.length) {
+      data.push(names.splice(0, 3));
+    }
+    return data;
+  }, [moves]);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: string[]; index: number }) => {
+      return (
+        <View style={{ marginRight: index < data.length - 1 ? Spacing.m : 0 }}>
+          {item.map((move, index) => {
+            return (
+              <View
+                key={move}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: Spacing.m,
+                  borderRadius: 30,
+                  borderWidth: 1,
+                  borderColor: Colors.BorderSubdued,
+                  marginBottom: index < item.length - 1 ? Spacing.s : 0,
+                }}
+              >
+                <Text>{move}</Text>
+              </View>
+            );
+          })}
+        </View>
+      );
+    },
+    [data.length]
+  );
+
+  return (
+    <Section title="Moves" style={{ marginTop: Spacing.xl }}>
+      <FlatList
+        keyExtractor={(_, index) => index.toString()}
+        data={data}
+        renderItem={renderItem}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      />
+    </Section>
+  );
+};
+
 const Stats = ({ stats }: { stats: Stat[] }) => {
   return (
-    <Section title="Base Stats" style={{ marginTop: Spacing.l }}>
+    <Section title="Base Stats" style={{ marginTop: Spacing.xl }}>
       {stats.map(({ stat, base_stat }) => {
         return <StatRow key={stat.name} name={stat.name} value={base_stat} />;
       })}
@@ -242,9 +297,15 @@ const About = ({
 }) => {
   return (
     <Section title="About">
+      <Text style={{ fontSize: 14, marginBottom: Spacing.l }}>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat.
+      </Text>
       {/* TODO: figure out unit conversion */}
-      <AboutRow title="Height" value={String(height)} />
-      <AboutRow title="Weight" value={String(weight)} />
+      <AboutRow title="Height" value={height.toString()} />
+      <AboutRow title="Weight" value={weight.toString()} />
       <AboutRow
         title="Abilities"
         value={abilities.map((a) => a.ability.name).join(", ")}
