@@ -1,6 +1,10 @@
 import React from "react";
 import { StyleSheet, View, Text, Dimensions, Image } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { Type } from "../../../models/server";
 import { TagList } from "../../../components/TagList";
 import {
@@ -14,27 +18,63 @@ export const Header = ({
   name,
   id,
   attributes,
+  scrollY,
 }: {
   imgUri: string;
   id: number;
   name: string;
   attributes: Type[];
+  scrollY: Animated.SharedValue<number>;
 }) => {
-  const { top } = useSafeAreaInsets();
+  const aStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollY.value,
+            [-60, 0, 95, 96],
+            [-30, 0, 0, 1],
+            Extrapolate.EXTEND
+          ),
+        },
+      ],
+    };
+  });
+
+  const backgroundAStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: interpolate(scrollY.value, [-100, 0], [3, 1], {
+            extrapolateLeft: "extend",
+            extrapolateRight: "clamp",
+          }),
+        },
+      ],
+    };
+  });
 
   return (
-    <View
-      style={{
-        paddingTop: 20,
-        paddingBottom: 30,
-        paddingHorizontal: Spacing.defaultMargin,
-      }}
+    <Animated.View
+      style={[
+        {
+          paddingTop: 20,
+          paddingBottom: 30,
+          paddingHorizontal: Spacing.defaultMargin,
+        },
+        aStyle,
+      ]}
     >
-      <View
-        style={{
-          ...StyleSheet.absoluteFillObject,
-          backgroundColor: getPokemonColorForAttribute(attributes[0].type.name),
-        }}
+      <Animated.View
+        style={[
+          {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: getPokemonColorForAttribute(
+              attributes[0].type.name
+            ),
+          },
+          backgroundAStyle,
+        ]}
       />
       <View
         style={{
@@ -86,7 +126,7 @@ export const Header = ({
           resizeMode="contain"
         />
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

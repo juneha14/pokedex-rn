@@ -1,9 +1,12 @@
 import React from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, View } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@apollo/client";
 import { useRouteNavigation, useRouteParams } from "../../navigation/useRoutes";
-import { NavBackButton } from "../../components/NavBackButton";
 import { LoadingIndicator } from "../../components/LoadingIndicator";
 import { Colors, Spacing } from "../../utils/theme";
 import { Header } from "./components/Header";
@@ -64,12 +67,20 @@ export const PokemonDetailsScreen = () => {
     PokemonDetailQueryVariables
   >(POKEMON_DETAILS, { variables: { name } });
 
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      console.log("==== Value of scrollY.value:", scrollY.value);
+      scrollY.value = e.contentOffset.y;
+    },
+  });
+
   return (
     <>
       <NavigationHeader
         backgroundColor={getPokemonColorForAttribute(attributes[0].type.name)}
       />
-      <ScrollView
+      <Animated.ScrollView
         style={{
           backgroundColor: Colors.SurfaceBackground,
         }}
@@ -77,8 +88,16 @@ export const PokemonDetailsScreen = () => {
           marginTop: 44 + top,
           backgroundColor: Colors.SurfaceBackground,
         }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
-        <Header imgUri={imgUri} name={name} id={id} attributes={attributes} />
+        <Header
+          imgUri={imgUri}
+          name={name}
+          id={id}
+          attributes={attributes}
+          scrollY={scrollY}
+        />
         <View
           style={{
             borderTopLeftRadius: 30,
@@ -105,7 +124,7 @@ export const PokemonDetailsScreen = () => {
             </>
           ) : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </>
   );
 };
