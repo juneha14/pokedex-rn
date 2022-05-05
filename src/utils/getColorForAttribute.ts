@@ -37,6 +37,14 @@ export const getColorForAttribute = (type: string) => {
   }
 };
 
+export const getPokemonColorForAttribute = (type: string) => {
+  if (isAttribute(type)) {
+    return pokemonColorForAttributeType[type];
+  } else {
+    return Colors.SurfaceNeutral;
+  }
+};
+
 const colorForAttributeType: Record<Attributes, string> = {
   normal: "#a4acaf",
   fighting: "#d56723",
@@ -58,4 +66,27 @@ const colorForAttributeType: Record<Attributes, string> = {
   fairy: "#fdb9e9",
   unknown: "#B4B9BE",
   shadow: "#6C7075",
+};
+
+const pokemonColorForAttributeType: Record<Attributes, string> = {
+  normal: "#cfd3d4",
+  fighting: "#ffbd94",
+  flying: "#96e4fa",
+  poison: "#dabae3",
+  ground: "#faefa5",
+  rock: "#d6c887",
+  bug: "#b0cf8c",
+  ghost: "#bfadd9",
+  steel: "#cad8d9",
+  fire: "#fac198",
+  water: "#a3cae3",
+  grass: "#cbeb9b",
+  electric: "#f2e58f",
+  psychic: "#fcbbe1",
+  ice: "#97e1f7",
+  dragon: "#a8cde0",
+  dark: "#b5b5b5",
+  fairy: "#ffdef5",
+  unknown: "#B4B9BE",
+  shadow: "#aeb1b5",
 };

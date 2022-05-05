@@ -3,7 +3,10 @@ import { StyleSheet, View, Text, Dimensions, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Type } from "../../../models/server";
 import { TagList } from "../../../components/TagList";
-import { getColorForAttribute } from "../../../utils/getColorForAttribute";
+import {
+  getColorForAttribute,
+  getPokemonColorForAttribute,
+} from "../../../utils/getColorForAttribute";
 import { Colors, Spacing } from "../../../utils/theme";
 
 export const Header = ({
@@ -22,7 +25,7 @@ export const Header = ({
   return (
     <View
       style={{
-        paddingTop: top + 50,
+        paddingTop: 20,
         paddingBottom: 30,
         paddingHorizontal: Spacing.defaultMargin,
       }}
@@ -30,8 +33,7 @@ export const Header = ({
       <View
         style={{
           ...StyleSheet.absoluteFillObject,
-          opacity: 0.5,
-          backgroundColor: getColorForAttribute(attributes[0].type.name),
+          backgroundColor: getPokemonColorForAttribute(attributes[0].type.name),
         }}
       />
       <View
