@@ -1,14 +1,14 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@apollo/client";
-import { useRouteNavigation, useRouteParams } from "../../navigation/useRoutes";
+import { useRouteParams } from "../../navigation/useRoutes";
 import { LoadingIndicator } from "../../components/LoadingIndicator";
 import { Colors, Spacing } from "../../utils/theme";
+import { NavigationHeader } from "./components/NavigationHeader";
 import { Header } from "./components/Header";
 import { About } from "./components/About";
 import { Stats } from "./components/Stats";
@@ -22,38 +22,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getPokemonColorForAttribute } from "../../utils/getColorForAttribute";
 
-// header background scale when scrolling down
-// header nav bar title animation
 // bottom sheet animation
 // pokemon list scroll up scale down opacity animation
-
-const NavigationHeader = ({ backgroundColor }: { backgroundColor: string }) => {
-  const { pop } = useRouteNavigation();
-  const { top } = useSafeAreaInsets();
-
-  return (
-    <View
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 44 + top,
-        paddingTop: top,
-        paddingHorizontal: Spacing.defaultMargin,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor,
-        zIndex: 1,
-      }}
-    >
-      <Pressable onPress={() => pop()}>
-        <Ionicons name="ios-arrow-back" size={26} color={Colors.IconNeutral} />
-      </Pressable>
-    </View>
-  );
-};
 
 export const PokemonDetailsScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -70,7 +40,6 @@ export const PokemonDetailsScreen = () => {
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
     onScroll: (e) => {
-      console.log("==== Value of scrollY.value:", scrollY.value);
       scrollY.value = e.contentOffset.y;
     },
   });
@@ -79,6 +48,8 @@ export const PokemonDetailsScreen = () => {
     <>
       <NavigationHeader
         backgroundColor={getPokemonColorForAttribute(attributes[0].type.name)}
+        title={name}
+        scrollY={scrollY}
       />
       <Animated.ScrollView
         style={{
