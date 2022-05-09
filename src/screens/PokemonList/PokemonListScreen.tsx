@@ -1,5 +1,9 @@
 import React, { useCallback } from "react";
-import { FlatList } from "react-native";
+import { FlatList, FlatListProps } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LoadingIndicator } from "../../components/LoadingIndicator";
 import { PokemonListItem } from "./PokemonListItem";
@@ -11,6 +15,13 @@ import { useRouteNavigation } from "../../navigation/useRoutes";
 export const PokemonListScreen = () => {
   const { loading, data } = usePokemonList();
   const { navigate } = useRouteNavigation();
+
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
 
   const onSelectPokemon = useCallback(
     (pokemon: Pokemon) => () => {
@@ -29,10 +40,11 @@ export const PokemonListScreen = () => {
           attributes={item.attributes}
           index={index}
           onPress={onSelectPokemon(item)}
+          scrollY={scrollY}
         />
       );
     },
-    [onSelectPokemon]
+    [onSelectPokemon, scrollY]
   );
 
   return (
@@ -46,13 +58,18 @@ export const PokemonListScreen = () => {
       {loading ? (
         <LoadingIndicator />
       ) : (
-        <FlatList
+        <AnimatedFlatList
           keyExtractor={(item) => item.id.toString()}
           data={data}
           renderItem={renderItem}
           numColumns={2}
+          scrollEventThrottle={16}
+          onScroll={onScroll}
         />
       )}
     </SafeAreaView>
   );
 };
+
+const AnimatedFlatList =
+  Animated.createAnimatedComponent<FlatListProps<Pokemon>>(FlatList);

@@ -22,9 +22,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getPokemonColorForAttribute } from "../../utils/getColorForAttribute";
 
-// bottom sheet animation
-// pokemon list scroll up scale down opacity animation
-
 export const PokemonDetailsScreen = () => {
   const { top } = useSafeAreaInsets();
 
