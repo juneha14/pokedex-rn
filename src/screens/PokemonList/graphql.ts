@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { PokemonItem, Type } from "../../models/server";
 
 export const POKEMON_LIST = gql`
   query PokemonList {
@@ -16,7 +17,8 @@ export const POKEMON_LIST = gql`
 
 export const POKEMON_ATTRIBUTE = gql`
   query AttributeType($pokemonName: String!) {
-    pokemon(name: $pokemonName) {
+    attributes: pokemon(name: $pokemonName) {
+      id
       types {
         type {
           name
@@ -26,6 +28,20 @@ export const POKEMON_ATTRIBUTE = gql`
   }
 `;
 
+export type PokemonListResponse = {
+  pokemons: {
+    status: boolean;
+    message?: string;
+    results: PokemonItem[];
+  };
+};
+
 export type PokemonAttributeQueryVariables = {
   pokemonName: string;
+};
+
+export type PokemonAttributeResponse = {
+  attributes: {
+    types: Type[];
+  };
 };

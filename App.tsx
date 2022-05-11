@@ -1,6 +1,6 @@
 import React from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import PokemonListScreen from "./src/screens/PokemonList";
+import { Routes } from "./src/navigation/Routes";
 
 const client = new ApolloClient({
   uri: "https://graphql-pokeapi.vercel.app/api/graphql",
@@ -10,7 +10,7 @@ const client = new ApolloClient({
 export default function App() {
   return (
     <ApolloProvider client={client}>
-      <PokemonListScreen />
+      <Routes />
     </ApolloProvider>
   );
 }

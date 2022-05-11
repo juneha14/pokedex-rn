@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Image, Text, Dimensions } from "react-native";
+import { View, Image, Text, Dimensions, Pressable } from "react-native";
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { TagList } from "../../components/TagList";
 import { Type } from "../../models/server";
 import { getColorForAttribute } from "../../utils/getColorForAttribute";
@@ -14,24 +20,58 @@ export const PokemonListItem = ({
   id,
   attributes,
   index,
+  onPress,
+  scrollY,
 }: {
   imageUri: string;
   name: string;
   id: number;
   attributes: Type[];
   index: number;
+  onPress: () => void;
+  scrollY: Animated.SharedValue<number>;
 }) => {
+  const height = useSharedValue(0);
+
+  const aStyle = useAnimatedStyle(() => {
+    const row = Math.floor(index / 2);
+    const inputRange = [row * height.value, (row + 1) * height.value];
+
+    return {
+      transform: [
+        {
+          scale: interpolate(
+            scrollY.value,
+            inputRange,
+            [1, 0.83],
+            Extrapolate.CLAMP
+          ),
+        },
+      ],
+      opacity: interpolate(scrollY.value, inputRange, [1, 0.3]),
+    };
+  });
+
   return (
-    <View
-      style={{
-        width: WIDTH,
-        marginRight: index % 2 === 0 ? Spacing.s : 0,
-        marginBottom: Spacing.m,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Colors.SurfaceBackgroundPressed,
-        overflow: "hidden",
-        backgroundColor: Colors.SurfaceForeground,
+    <AnimatedPressable
+      style={[
+        {
+          width: WIDTH,
+          marginRight: index % 2 === 0 ? Spacing.s : 0,
+          marginBottom: Spacing.m,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: Colors.SurfaceBackgroundPressed,
+          overflow: "hidden",
+          backgroundColor: Colors.SurfaceForeground,
+        },
+        aStyle,
+      ]}
+      onPress={onPress}
+      onLayout={(e) => {
+        if (height.value === 0) {
+          height.value = e.nativeEvent.layout.height;
+        }
       }}
     >
       <View
@@ -85,6 +125,8 @@ export const PokemonListItem = ({
           })}
         />
       </View>
-    </View>
+    </AnimatedPressable>
   );
 };
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

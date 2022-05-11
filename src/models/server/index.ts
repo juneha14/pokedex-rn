@@ -1,5 +1,8 @@
 export { BaseName } from "./BaseName";
-export { PokemonAttributeResponse } from "./PokemonAttributeResponse";
 export { PokemonItem } from "./PokemonItem";
-export { PokemonListResponse } from "./PokemonListResponse";
 export { Type } from "./Type";
+export { Ability } from "./Ability";
+export { Stat } from "./Stat";
+export { Move } from "./Move";
+export { BaseResponse } from "./BaseResponse";
+export { Chain } from "./Evolution";
