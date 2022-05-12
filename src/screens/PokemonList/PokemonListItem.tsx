@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { SharedElement } from "react-navigation-shared-element";
 import { TagList } from "../../components/TagList";
 import { Type } from "../../models/server";
 import { getColorForAttribute } from "../../utils/getColorForAttribute";
@@ -81,11 +82,13 @@ export const PokemonListItem = ({
           backgroundColor: Colors.SurfaceForegroundPressed,
         }}
       >
-        <Image
-          source={{ uri: imageUri }}
-          style={{ width: IMG_SIZE, height: IMG_SIZE }}
-          resizeMode="cover"
-        />
+        <SharedElement id={`${id}.${imageUri}`}>
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: IMG_SIZE, height: IMG_SIZE }}
+            resizeMode="cover"
+          />
+        </SharedElement>
       </View>
       <View
         style={{
@@ -113,7 +116,6 @@ export const PokemonListItem = ({
         >
           {name}
         </Text>
-
         <TagList
           style={{ marginTop: Spacing.m }}
           tags={attributes.map((attribute) => {

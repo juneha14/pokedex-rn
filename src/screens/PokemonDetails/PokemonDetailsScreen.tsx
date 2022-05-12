@@ -1,5 +1,5 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { InteractionManager, View } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -21,6 +21,7 @@ import {
 } from "./graphql";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getPokemonColorForAttribute } from "../../utils/getColorForAttribute";
+import { useFocusEffect } from "@react-navigation/native";
 
 export const PokemonDetailsScreen = () => {
   const { top } = useSafeAreaInsets();
@@ -41,6 +42,17 @@ export const PokemonDetailsScreen = () => {
     },
   });
 
+  const [canScroll, setCanScroll] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      // Spring open transition spec animation takes some time to complete.
+      // Enable scrolling iff shared element transition animation is complete.
+      InteractionManager.runAfterInteractions(() => {
+        setCanScroll(true);
+      });
+    }, [])
+  );
+
   return (
     <>
       <NavigationHeader
@@ -56,6 +68,7 @@ export const PokemonDetailsScreen = () => {
           marginTop: 44 + top,
           backgroundColor: Colors.SurfaceBackground,
         }}
+        scrollEnabled={canScroll}
         onScroll={onScroll}
         scrollEventThrottle={16}
       >

@@ -80,16 +80,16 @@ export const NavigationHeader = ({
             width: 35,
             height: 35,
             borderRadius: 35 / 2,
+            borderColor: Colors.IconOnPrimary,
             borderWidth: 1,
-            borderColor: Colors.BorderSubdued,
           },
           buttonAStyle,
         ]}
         onPress={() => pop()}
       >
         <Ionicons
-          name="ios-arrow-back"
-          size={26}
+          name="ios-close-outline"
+          size={30}
           color={Colors.IconOnPrimary}
         />
       </AnimatedPressable>
