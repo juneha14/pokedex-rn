@@ -12,6 +12,7 @@ import {
   getPokemonColorForAttribute,
 } from "../../../utils/getColorForAttribute";
 import { Colors, Spacing } from "../../../utils/theme";
+import { SharedElement } from "react-navigation-shared-element";
 
 export const Header = ({
   imgUri,
@@ -120,11 +121,13 @@ export const Header = ({
           marginTop: Spacing.m,
         }}
       >
-        <Image
-          source={{ uri: imgUri }}
-          style={{ width: IMG_WIDTH, height: IMG_HEIGHT }}
-          resizeMode="contain"
-        />
+        <SharedElement id={`${id}.${imgUri}`}>
+          <Image
+            source={{ uri: imgUri }}
+            style={{ width: IMG_WIDTH, height: IMG_HEIGHT }}
+            resizeMode="contain"
+          />
+        </SharedElement>
       </View>
     </Animated.View>
   );
